@@ -6,6 +6,11 @@
 
 typedef enum {
     OP_CONSTANT,
+    OP_ADD,
+    OP_SUBTRACT,
+    OP_MULTIPLY,
+    OP_DIVIDE,
+    OP_NEGATE,
     OP_RETURN,
 } OpCode;
 
@@ -13,6 +18,7 @@ typedef struct {
     int count;
     int capacity;
     int* lines;
+    // 数値で表されるコード
     uint8_t* code;
     ValueArray constants;
 } Chunk;

@@ -15,4 +15,4 @@ add_executable(crafting_interpreters_clox
         debug.h
         value.c
         value.h
-        main.c)
+        main.c vm.h vm.c)

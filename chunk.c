@@ -24,6 +24,12 @@ void writeChunk(Chunk* chunk, uint8_t byte, int line){
     chunk->count++;
 }
 
+/**
+ * Chunkに定数を書き込む
+ * @param chunk
+ * @param value
+ * @return 定数を格納したValue型の配列のindex(chunk->constantsのindex)
+ */
 int addConstant(Chunk* chunk, Value value) {
     writeValueArray(&chunk->constants,value);
     return chunk->constants.count - 1;
