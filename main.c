@@ -51,7 +51,7 @@ static char* readFile(const char* path) {
 }
 
 static void runFile(const char* path) {
-    char * source = readFile(path);
+    char* source = readFile(path);
     InterpretResult result = interpret(source);
     free(source);
 
@@ -62,15 +62,18 @@ static void runFile(const char* path) {
 int main(int argc, const char* argv[]) {
     initVM();
 
+
     if (argc == 1) {
         repl();
     } else if (argc == 2) {
         runFile(argv[1]);
     } else {
         fprintf(stderr, "Usage: clox [path]\n");
-        exit(54);
+        exit(64);
     }
 
     freeVM();
+
     return 0;
 }
+

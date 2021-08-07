@@ -8,7 +8,8 @@ void* reallocate(void* pointer, size_t oldSize, size_t newSize) {
         free(pointer);
         return NULL;
     }
-    void * result = realloc(pointer, newSize);
+
+    void* result = realloc(pointer, newSize);
     if (result == NULL) exit(1);
     return result;
 }
@@ -32,3 +33,4 @@ void freeObjects() {
         object = next;
     }
 }
+

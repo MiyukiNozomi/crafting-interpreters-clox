@@ -1,7 +1,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-
 #include "common.h"
 #include "compiler.h"
 #include "debug.h"
@@ -20,11 +19,11 @@ static void runtimeError(const char* format, ...) {
     va_start(args, format);
     vfprintf(stderr, format, args);
     va_end(args);
-    fputc("\n", stderr);
+    fputs("\n", stderr);
 
     size_t instruction = vm.ip - vm.chunk->code - 1;
-    int line = vm.chunk -> lines[instruction];
-    fprintf(stderr,  "[line %d] in script\n", line);
+    int line = vm.chunk->lines[instruction];
+    fprintf(stderr, "[line %d] in script\n", line);
     resetStack();
 }
 
@@ -35,6 +34,7 @@ void initVM() {
 }
 
 void freeVM() {
+    freeTable(&vm.strings);
     freeObjects();
 }
 
@@ -76,16 +76,16 @@ static InterpretResult run() {
 #define BINARY_OP(valueType, op) \
     do { \
         if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) { \
-            runtimeError("Operands must be numbers.");    \
-            return INTERPRET_RUNTIME_ERROR;               \
-        }                             \
+            runtimeError("Operands must be numbers."); \
+            return INTERPRET_RUNTIME_ERROR; \
+        } \
         double b = AS_NUMBER(pop()); \
         double a = AS_NUMBER(pop()); \
-        push(valueType(a op b));\
+        push(valueType(a op b)); \
     } while (false)
 
-    for(;;) {
-#ifdef DEBUG_TRACE_EXECUTION
+    for (;;) {
+        #ifdef DEBUG_TRACE_EXECUTION
         printf("          ");
         for (Value* slot = vm.stack; slot < vm.stackTop; slot++) {
             printf("[ ");
@@ -93,15 +93,17 @@ static InterpretResult run() {
             printf(" ]");
         }
         printf("\n");
-        disassembleInstruction(vm.chunk, (int)(vm.ip - vm.chunk->code));
-#endif
+        disassembleInstruction(vm.chunk,
+                               (int)(vm.ip - vm.chunk->code));
+        #endif
+
+    }
         uint8_t instruction;
         switch (instruction = READ_BYTE()) {
             case OP_CONSTANT: {
                 Value constant = READ_CONSTANT();
                 push(constant);
                 break;
-            }
             case OP_NIL: push(NIL_VAL); break;
             case OP_TRUE: push(BOOL_VAL(true)); break;
             case OP_FALSE: push(BOOL_VAL(false)); break;
@@ -111,8 +113,8 @@ static InterpretResult run() {
                 push(BOOL_VAL(valuesEqual(a, b)));
                 break;
             }
-            case OP_GREATER:    BINARY_OP(BOOL_VAL, >); break;
-            case OP_LESS:       BINARY_OP(BOOL_VAL, <); break;
+            case OP_GREATER:  BINARY_OP(BOOL_VAL, >); break;
+            case OP_LESS:     BINARY_OP(BOOL_VAL, <); break;
             case OP_ADD: {
                 if (IS_STRING(peek(0)) && IS_STRING(peek(1))) {
                     concatenate();
@@ -122,15 +124,14 @@ static InterpretResult run() {
                     push(NUMBER_VAL(a + b));
                 } else {
                     runtimeError(
-                            "Operands must be two numbers or two strings."
-                    );
+                            "Operands must be two numbers or two strings.");
                     return INTERPRET_RUNTIME_ERROR;
                 }
                 break;
             }
-            case OP_SUBTRACT:   BINARY_OP(NUMBER_VAL, -); break;
-            case OP_MULTIPLY:   BINARY_OP(NUMBER_VAL, *); break;
-            case OP_DIVIDE:     BINARY_OP(NUMBER_VAL, /); break;
+            case OP_SUBTRACT: BINARY_OP(NUMBER_VAL, -); break;
+            case OP_MULTIPLY: BINARY_OP(NUMBER_VAL, *); break;
+            case OP_DIVIDE:   BINARY_OP(NUMBER_VAL, /); break;
             case OP_NOT:
                 push(BOOL_VAL(isFalsey(pop())));
                 break;
@@ -164,11 +165,10 @@ InterpretResult interpret(const char* source) {
     }
 
     vm.chunk = &chunk;
-    vm.ip = vm.chunk -> code;
+    vm.ip = vm.chunk->code;
 
     InterpretResult result = run();
 
     freeChunk(&chunk);
     return result;
 }
-
